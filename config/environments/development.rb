@@ -1,6 +1,6 @@
 Rails.application.configure do
 
-  config.datadir = '/var/cache/opengeometadata'
+  config.datadir = '/Users/eliotj/cache/opengeometadata'
 
   # Settings specified here will take precedence over those in config/application.rb.
 
