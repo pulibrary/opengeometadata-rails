@@ -1,4 +1,5 @@
 require 'json'
+require 'xmlsimple'
 
 class OpengeometadataController < ApplicationController
   
@@ -58,18 +59,35 @@ class OpengeometadataController < ApplicationController
     fn = File.join(@datadir, @institution, layer_path)
     raise ActionController::RoutingError.new("Layer is not available: #{@uuid}") unless File.directory?(fn)
     
-    # ...and in the given format
-
     # show the layer now
     respond_to do |format|
-      fn = File.join(fn, "#{@metadata_format}.#{params[:format]}")
-      raise ActionController::RoutingError.new("Layer is not available in #{@metadata_format.upcase} format as #{params[:format].upcase}") unless File.size?(fn)
+
+      # get whole file path
+      orig_fn = File.join(fn, "#{@metadata_format}.#{params[:format]}")
+
+      # if file exists, send it on
+      if File.size?(orig_fn)
+        format.xml { send_file orig_fn, disposition: 'inline', type: 'text/xml' }
+        format.html { send_file orig_fn, disposition: 'inline', type: 'text/html' }
+        format.json { send_file orig_fn, disposition: 'inline', type: 'application/json' }
       
-      format.xml { send_file fn, disposition: 'inline', type: 'text/xml' }
-      format.html { send_file fn, disposition: 'inline', type: 'text/html' }
-      format.json { send_file fn, disposition: 'inline', type: 'application/json' }
+      # if not and the format is json
+      elsif params[:format] == 'json'
+        
+        #check if xml version exists#
+        xml_fn = File.join(fn, "#{@metadata_format}.xml")
+        if File.size?(xml_fn)
+
+          # it exists, so read xml and fix encoding if necessary
+          xml_string = (File.read xml_fn).sub('utf8','utf-8')
+
+          # convert to hash and render as json
+          xml = XmlSimple.xml_in(xml_string, :ForceArray => false)
+          format.json { render json: xml }
+        end
+      else
+        raise ActionController::RoutingError.new("Layer is not available in #{@metadata_format.upcase} format as #{params[:format].upcase}")
+      end
     end
   end
-
-
 end
