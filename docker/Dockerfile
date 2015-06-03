@@ -64,22 +64,19 @@ RUN gem install bundler && \
 WORKDIR /usr/src/
 
 # Install unicorn
-RUN gem install unicorn && \
-    mkdir /var/www /var/www/ogm /var/www/ogm/pids /var/www/ogm/log/
+RUN mkdir /var/www /var/www/ogm /var/www/ogm/pids /var/www/ogm/log/
 
-# Preload gems
+# Load repo
 RUN git clone https://github.com/pulibrary/opengeometadata-rails.git && \
     cd opengeometadata-rails && \
     echo "gem 'unicorn'" >> Gemfile && \
-    bundle install
+    bundle install && \
+    mkdir /var/cache/opengeometadata
 
 # Add scripts and config files
 RUN mkdir /usr/scripts
 ADD  unicorn.rb /usr/src/opengeometadata-rails/config/unicorn.rb
 ADD . /usr/scripts
-
-# make data directory
-RUN mkdir /var/cache/opengeometadata
 
 WORKDIR /usr/src/opengeometadata-rails
 

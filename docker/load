@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cd /var/cache/opengeometadata && git clone https://github.com/OpenGeoMetadata/edu.princeton.arks.git
