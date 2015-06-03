@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# reload app
+cd /usr/src/opengeometadata-rails
+bundle install
+
+# restart unicorn
+unicorn_pid=`cat /var/www/ogm/pids/unicorn.pid`
+echo "Restarting Unicorn ($unicorn_pid)"
+kill -HUP $unicorn_pid
